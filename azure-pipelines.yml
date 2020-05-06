@@ -38,7 +38,7 @@ jobs:
     environment:
       name:  dev
       resourceType: VirtualMachine
-      tags: web1
+      tags: Zulu
     strategy:
     
       
