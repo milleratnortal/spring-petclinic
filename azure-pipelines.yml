@@ -3,13 +3,9 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
-trigger:
-  branches:
-    include:
-    - master
-    
-  stages:
-  - stage: Build
+
+stages:
+- stage: Build
     jobs:
     - job: Build
         steps:
@@ -33,7 +29,7 @@ trigger:
         - upload: $(Build.ArtifactStagingDirectory)
           artifact: drop
       
-  - stage: Deploy
+- stage: Deploy
     jobs:
     - job:  Deploy
       - deployment: VMDeploy
