@@ -9,7 +9,7 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
+jobs:
 - job: Build
     displayName: Build Maven Project
     steps:
@@ -32,6 +32,13 @@ steps:
         TargetFolder: $(Build.ArtifactStagingDirectory)
     - upload: $(Build.ArtifactStagingDirectory)
       artifact: drop
-
+- job:  
+  - deployment: VMDeploy
+    displayName: web
+    environment:
+      name:  dev
+      resourceType: VirtualMachine
+      tags: web1
+    strategy:
     
       
