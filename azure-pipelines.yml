@@ -6,44 +6,47 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+      displayName: Build Maven Project
+      steps:
+      - task: Maven@3
+        displayName: 'Maven Package'
+        inputs:
+          mavenPomFile: 'pom.xml'
+          mavenOptions: '-Xmx3072m'
+          javaHomeOption: 'JDKVersion'
+          jdkVersionOption: '1.8'
+          jdkArchitectureOption: 'x64'
+          publishJUnitResults: true
+          testResultsFiles: '**/surefire-reports/TEST-*.xml'
+          goals: 'package'
+      - task: CopyFiles@2
+        displayName: 'Copy Files to artifact staging directory'
+        inputs:
+          SourceFolder: '$(System.DefaultWorkingDirectory)'
+          Contents: '**/target/*.?(war|jar)'
+          TargetFolder: $(Build.ArtifactStagingDirectory)
+      - upload: $(Build.ArtifactStagingDirectory)
+        artifact: drop
+      
 
-jobs:
-- job: Build
-    displayName: Build Maven Project
-    steps:
-    - task: Maven@3
-      displayName: 'Maven Package'
-      inputs:
-        mavenPomFile: 'pom.xml'
-        mavenOptions: '-Xmx3072m'
-        javaHomeOption: 'JDKVersion'
-        jdkVersionOption: '1.8'
-        jdkArchitectureOption: 'x64'
-        publishJUnitResults: true
-        testResultsFiles: '**/surefire-reports/TEST-*.xml'
-        goals: 'package'
-    - task: CopyFiles@2
-      displayName: 'Copy Files to artifact staging directory'
-      inputs:
-        SourceFolder: '$(System.DefaultWorkingDirectory)'
-        Contents: '**/target/*.?(war|jar)'
-        TargetFolder: $(Build.ArtifactStagingDirectory)
-    - upload: $(Build.ArtifactStagingDirectory)
-      artifact: drop
-- job:  
-  - deployment: VMDeploy
-    displayName: web
-    pool:
-      vmImage: 'Ubuntu-18.04'
-    environment:
-      name:  dev
-      resourceType: VirtualMachine
-      tags: Zulu
-    strategy:
-      runOnce:
-      deploy:
-        steps:
-        - script: echo my first deployment  
+- stage: Deploy
+  jobs:
+  - job:  Deploy
+    - deployment: VMDeploy
+      displayName: web
+      pool:
+        vmImage: 'Ubuntu-18.04'
+      environment:
+        name:  dev
+        resourceType: VirtualMachine
+        tags: Zulu
+      strategy:
+        runOnce:
+        deploy:
+          steps:
+          - script: echo my first deployment  
       
